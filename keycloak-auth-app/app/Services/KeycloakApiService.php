@@ -463,7 +463,6 @@ class KeycloakApiService
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $refreshToken
             ];
-
             if (!empty($this->clientSecret)) {
                 $params['client_secret'] = $this->clientSecret;
             }

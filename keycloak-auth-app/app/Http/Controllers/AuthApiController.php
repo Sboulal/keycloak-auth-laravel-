@@ -215,47 +215,54 @@ class AuthApiController extends Controller
             return redirect('/');
         }
     }
-public function redirectToGoogle()
-{
-    // Return the redirect URL instead of redirecting
-    $url = Socialite::driver('google')
-        ->stateless()
-        ->redirect()
-        ->getTargetUrl();
-    
-    return response()->json(['url' => $url]);
-}
-
-public function handleGoogleCallback(Request $request)
-{
-    try {
-        $googleUser = Socialite::driver('google')->stateless()->user();
-        
-        $user = User::where('email', $googleUser->getEmail())->first();
-
-        if (!$user) {
-            $user = User::create([
-                'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
-                'google_id' => $googleUser->getId(),
-                'password' => bcrypt(Str::random(32)),
-                'email_verified_at' => now(),
-            ]);
-        } else {
-            if (!$user->google_id) {
-                $user->update(['google_id' => $googleUser->getId()]);
-            }
-        }
-
-        // Create API token
-        $token = $user->createToken('google-auth')->plainTextToken;
-        
-        // Redirect to frontend with token
-        return redirect('/dashboard/auth/callback?token=' . $token);
-        
-    } catch (\Exception $e) {
-        Log::error('Google Auth Error: ' . $e->getMessage());
-        return redirect('/dashboard/login?error=auth_failed');
+ /**
+     * Redirect to Google OAuth
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')
+            ->redirect();
     }
-}
+
+    /**
+     * Handle Google OAuth Callback
+     */
+    public function handleGoogleCallback(Request $request)
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            // Rechercher l'utilisateur par email
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            if (!$user) {
+                // Créer un nouvel utilisateur
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'password' => bcrypt(Str::random(32)),
+                    'email_verified_at' => now(),
+                ]);
+                
+                Log::info('New user created via Google', ['email' => $user->email]);
+            } else {
+                // Mettre à jour google_id si vide
+                if (!$user->google_id) {
+                    $user->update(['google_id' => $googleUser->getId()]);
+                }
+            }
+
+            // Authentifier l'utilisateur
+            Auth::login($user, true);
+
+            Log::info('User logged in via Google', ['user_id' => $user->id, 'email' => $user->email]);
+
+            return redirect()->intended('/dashboard');
+            
+        } catch (\Exception $e) {
+            Log::error('Google Auth Error: ' . $e->getMessage());
+            return redirect('/login')->with('error', 'Authentication failed. Please try again.');
+        }
+    }
 }

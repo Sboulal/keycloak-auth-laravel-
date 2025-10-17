@@ -31,11 +31,18 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
    'keycloak' => [
-    'client_id' => env('KEYCLOAK_CLIENT_ID'),
-    'client_secret' => env('KEYCLOAK_CLIENT_SECRET'),
-    'redirect' => env('KEYCLOAK_REDIRECT_URI'),
-    'base_url' => env('KEYCLOAK_BASE_URL'),
-    'realms' => env('KEYCLOAK_REALM'),
+        'base_url' => env('KEYCLOAK_BASE_URL', 'http://localhost:8080'),
+        'realm' => env('KEYCLOAK_REALM', 'master'),
+        'client_id' => env('KEYCLOAK_CLIENT_ID'),
+        'client_secret' => env('KEYCLOAK_CLIENT_SECRET'),
+        'redirect_uri' => env('KEYCLOAK_REDIRECT_URI'),
+        'admin_username' => env('KEYCLOAK_ADMIN_USERNAME'),
+        'admin_password' => env('KEYCLOAK_ADMIN_PASSWORD'),
+    ],
+'google' => [
+    'client_id' => env('GOOGLE_CLIENT_ID'),
+    'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+     'redirect' => env('GOOGLE_REDIRECT_URI'),
 ],
 
 ];

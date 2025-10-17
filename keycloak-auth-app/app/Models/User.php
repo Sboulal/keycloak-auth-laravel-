@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'keycloak_id',
+        'google_id',
     ];
 
     /**

@@ -46,7 +46,7 @@ class KeycloakController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             
-            return redirect('/')->with('error', 'Authentication failed: ' . $e->getMessage());
+            return redirect('/')->with('error', 'Salma: ' . $e->getMessage());
         }
     }
 

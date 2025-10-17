@@ -1,6 +1,13 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\AuthApiController;
+use Laravel\Socialite\Two\User as OAuth2User;
+use Laravel\Socialite\Two\InvalidStateException;
 use App\Http\Controllers\Auth\KeycloakController;
 
 /*
@@ -17,24 +24,30 @@ use App\Http\Controllers\Auth\KeycloakController;
 Route::get('/', function () {
     return view('welcome');
 });
-// Keycloak authentication routes
+
+// API-based authentication routes
+Route::get('/login', [AuthApiController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthApiController::class, 'login'])->name('login.post');
+
+Route::get('/register', [AuthApiController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthApiController::class, 'register'])->name('register.post');
+
+// Logout route (choose one implementation)
+Route::post('/logout', [AuthApiController::class, 'logout'])->name('logout');
+
+// Keycloak SSO authentication routes (alternative to direct login)
 Route::get('/auth/keycloak', [KeycloakController::class, 'redirect'])->name('keycloak.login');
-Route::get('/auth/keycloak/callback', [KeycloakController::class, 'callback']);
+Route::get('/auth/keycloak/callback', [KeycloakController::class, 'callback'])->name('keycloak.callback');
+Route::post('/auth/keycloak/logout', [KeycloakController::class, 'logout'])->name('keycloak.logout');
+
+
+Route::get('auth/google', [AuthApiController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [AuthApiController::class, 'handleGoogleCallback'])->name('google.callback');
+
 
 // Protected dashboard route
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-});
-
-// Logout route
-Route::post('/logout', [KeycloakController::class, 'logout'])->name('logout');
-Route::get('/test-keycloak-config', function () {
-    return [
-        'client_id' => config('services.keycloak.client_id'),
-        'base_url' => config('services.keycloak.base_url'),
-        'realm' => config('services.keycloak.realms'),
-        'redirect' => config('services.keycloak.redirect'),
-    ];
 });

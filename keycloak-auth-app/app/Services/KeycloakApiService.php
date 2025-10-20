@@ -231,7 +231,8 @@ class KeycloakApiService
                 'message' => 'Failed to retrieve user information'
             ];
 
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) {
             Log::error('Get user info exception', [
                 'message' => $e->getMessage()
             ]);

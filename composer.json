@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.8",
+        "nwidart/laravel-modules": "10.0",
         "socialiteproviders/keycloak": "^5.3"
     },
     "require-dev": {
@@ -61,7 +62,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "wikimedia/composer-merge-plugin": true
         }
     },
     "minimum-stability": "stable",

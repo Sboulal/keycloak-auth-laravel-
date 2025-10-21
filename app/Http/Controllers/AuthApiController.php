@@ -116,8 +116,12 @@ class AuthApiController extends Controller
  
             // Login user
             Auth::login($user, $request->has('remember'));
-
-            Log::info('User logged in successfully', ['user_id' => $user->id, 'email' => $user->email]);
+          // Add session flash notification
+session()->flash('notification', [
+    'type' => 'login',
+    'title' => 'Login Successful',
+    'message' => 'Welcome back! You have successfully logged in.'
+]);
 
             return redirect()->intended('/dashboard');
             
@@ -170,6 +174,21 @@ class AuthApiController extends Controller
                 Log::error('Keycloak registration failed', ['result' => $result]);
                 return back()->with('error', $result['message'])->withInput($request->except('password', 'password_confirmation'));
             }
+            // Create local user record and send notification
+$user = User::create([
+    'name' => $request->first_name . ' ' . $request->last_name,
+    'email' => $request->email,
+    'password' => bcrypt($request->password),
+]);
+
+// Send registration notification
+$user->notify(new \App\Notifications\UserRegistered($user));
+// Add session flash notification for registration
+session()->flash('notification', [
+    'type' => 'registration',
+    'title' => 'Registration Successful',
+    'message' => 'Your account has been created successfully! Please login.'
+]);
 
             return redirect()->route('login')
                 ->with('success', 'Registration successful! Please login with your credentials.');
@@ -255,6 +274,13 @@ class AuthApiController extends Controller
 
             // Authentifier l'utilisateur
             Auth::login($user, true);
+            // Add session flash notification
+session()->flash('notification', [
+    'type' => 'login',
+    'title' => 'Google Login Successful',
+    'message' => 'Welcome! You have successfully logged in with Google.'
+]);
+
 
             Log::info('User logged in via Google', ['user_id' => $user->id, 'email' => $user->email]);
 

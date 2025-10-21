@@ -139,5 +139,9 @@
             </div>
         </div>
     </div>
+    <!-- Add notification popup component -->
+    @auth
+        @include('components.notification-popup')
+    @endauth
 </body>
 </html>

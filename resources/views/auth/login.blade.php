@@ -109,8 +109,8 @@
                 </div>
                 <div>
                     <a href="{{ route('auth.google') }}" class="btn btn-danger">
-    <i class="fab fa-google"></i> Login with Google
-</a>
+                        <i class="fab fa-google"></i> Login with Google
+                    </a>
 
                 </div>
                 

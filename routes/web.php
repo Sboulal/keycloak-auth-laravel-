@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\AuthApiController;
+use App\Http\Controllers\TrackingController;
 use Laravel\Socialite\Two\User as OAuth2User;
 use Laravel\Socialite\Two\InvalidStateException;
 use App\Http\Controllers\Auth\KeycloakController;
@@ -44,10 +45,22 @@ Route::post('/auth/keycloak/logout', [KeycloakController::class, 'logout'])->nam
 Route::get('auth/google', [AuthApiController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [AuthApiController::class, 'handleGoogleCallback'])->name('google.callback');
 
-
+Route::get('/tracking', [TrackingController::class, 'index'])->name('tracking.index');
 // Protected dashboard route
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+    Route::post('/notifications/{id}/read', function($id) {
+        $notification = \Illuminate\Notifications\DatabaseNotification::where('id', $id)
+            ->where('notifiable_id', auth()->id())
+            ->first();
+        
+        if ($notification) {
+            $notification->markAsRead();
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['success' => false], 404);
+    })->name('notifications.read');
 });

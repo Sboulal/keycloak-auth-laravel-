@@ -115,6 +115,66 @@ class EmailVerificationService
             ];
         }
     }
+    // Dans votre VerificationService
+public function verifyLoginCode(string $email, string $code): array
+{
+    try {
+        $record = DB::table('email_verifications')
+            ->where('email', $email)
+            ->first();
+
+        if (!$record || $record->code !== $code) {
+            return [
+                'success' => false,
+                'message' => 'Invalid verification code',
+                'user' => null,
+                'token' => null
+            ];
+        }
+
+        if (Carbon::parse($record->expires_at)->isPast()) {
+            return [
+                'success' => false,
+                'message' => 'Verification code has expired',
+                'user' => null,
+                'token' => null
+            ];
+        }
+
+        $user = User::where('email', $email)->first();
+        
+        if (!$user) {
+            return [
+                'success' => false,
+                'message' => 'User not found',
+                'user' => null,
+                'token' => null
+            ];
+        }
+
+        // Delete verification record (but don't mark email as verified)
+        DB::table('email_verifications')->where('email', $email)->delete();
+
+        // Generate JWT token
+        $token = JWTAuth::fromUser($user);
+
+        return [
+            'success' => true,
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token
+        ];
+
+    } catch (\Exception $e) {
+        Log::error('Login code verification failed', ['error' => $e->getMessage()]);
+        return [
+            'success' => false,
+            'message' => 'Verification failed: ' . $e->getMessage(),
+            'user' => null,
+            'token' => null
+        ];
+    }
+}
 
     /**
      * Resend verification code

@@ -29,113 +29,95 @@ class LoginController extends Controller
         $this->passwordResetService = $passwordResetService;
     }
 
-    /**
-     * Login
-     * 
-     * Authenticate a user and return a JWT token. If the email is not verified, 
-     * a new verification code will be sent.
-     * 
-     * @bodyParam email string required The user's email address. Example: johndoe@example.com
-     * @bodyParam password string required The user's password. Example: password123
-     * 
-     * @response 200 {
-     *   "success": true,
-     *   "message": "Login successful",
-     *   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-     *   "token_type": "bearer",
-     *   "expires_in": 3600,
-     *   "user": {
-     *     "id": 1,
-     *     "name": "johndoe",
-     *     "email": "johndoe@example.com"
-     *   }
-     * }
-     * 
-     * @response 403 {
-     *   "success": false,
-     *   "require_verification": true,
-     *   "message": "Please verify your email. A verification code has been sent.",
-     *   "email": "johndoe@example.com",
-     *   "debug_code": "123456"
-     * }
-     * 
-     * @response 401 {
-     *   "success": false,
-     *   "message": "Invalid credentials"
-     * }
-     */
-    public function login(Request $request)
-    {
-        try {
-            $request->validate([
-                'email' => 'required|email',
-                'password' => 'required|string'
-            ]);
+   /**
+ * Login
+ * 
+ * Authenticate a user using email and verification code.
+ * 
+ * @bodyParam email string required The user's email address. Example: johndoe@example.com
+ * @bodyParam code string required The 6-digit verification code. Example: 123456
+ * 
+ * @response 200 {
+ *   "success": true,
+ *   "message": "Login successful",
+ *   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+ *   "token_type": "bearer",
+ *   "expires_in": 3600,
+ *   "user": {
+ *     "id": 1,
+ *     "name": "johndoe",
+ *     "email": "johndoe@example.com"
+ *   }
+ * }
+ * 
+ * @response 401 {
+ *   "success": false,
+ *   "message": "Invalid verification code"
+ * }
+ * 
+ * @response 404 {
+ *   "success": false,
+ *   "message": "User not found"
+ * }
+ */
+public function login(Request $request)
+{
+    try {
+        $request->validate([
+            'email' => 'required|email',
+            'code' => 'required|string',
+        ]);
 
-            // Find user
-            $user = User::where('email', $request->email)->first();
-            
-            if (!$user || !Hash::check($request->password, $user->password)) {
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'Invalid credentials'
-                ], 401);
-            }
+        // Verify the code using the service
+        $result = $this->verificationService->verifyLoginCode($request->email, $request->code);
 
-            // Check email verification
-            if (!$user->email_verified_at) {
-                $code = $this->verificationService->sendVerificationCode($user->email);
-
-                return response()->json([
-                    'success' => false,
-                    'require_verification' => true,
-                    'message' => 'Please verify your email. A verification code has been sent.',
-                    'email' => $user->email,
-                    'debug_code' => config('app.debug') ? $code : null
-                ], 403);
-            }
-
-            // Check if password must be changed
-            if ($user->must_change_password) {
-                $code = $this->passwordResetService->sendPasswordResetCode($user->email);
-
-                return response()->json([
-                    'success' => false,
-                    'require_password_change' => true,
-                    'message' => 'You must change your password. A code has been sent to your email.',
-                    'email' => $user->email,
-                    'debug_code' => config('app.debug') ? $code : null
-                ], 403);
-            }
-
-            // Generate JWT token
-            $token = JWTAuth::fromUser($user);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'access_token' => $token,
-                'token_type' => 'bearer',
-                'expires_in' => JWTAuth::factory()->getTTL() * 60,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Login failed', [
-                'email' => $request->email,
-                'error' => $e->getMessage(),
-            ]);
-            
+        if (!$result['success']) {
+            $statusCode = $result['message'] === 'User not found' ? 404 : 401;
             return response()->json([
                 'success' => false,
-                'message' => 'Login failed: ' . $e->getMessage()
-            ], 500);
+                'message' => $result['message']
+            ], $statusCode);
         }
+
+        // Check if password must be changed
+        if ($result['user']->must_change_password) {
+            $code = $this->passwordResetService->sendPasswordResetCode($result['user']->email);
+
+            return response()->json([
+                'success' => false,
+                'require_password_change' => true,
+                'message' => 'You must change your password. A code has been sent to your email.',
+                'email' => $result['user']->email,
+                'debug_code' => config('app.debug') ? $code : null
+            ], 403);
+        }
+
+        // Return success with token
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'access_token' => $result['token'],
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
+            'user' => [
+                'id' => $result['user']->id,
+                'name' => $result['user']->name,
+                'email' => $result['user']->email,
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Login failed', [
+            'email' => $request->email,
+            'error' => $e->getMessage(),
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Login failed: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Logout

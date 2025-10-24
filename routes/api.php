@@ -25,18 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-// Route::prefix('auth')->group(function () {
-//     Route::post('/login', [AuthApiController::class, 'apiLogin']);
-//     Route::post('/register', [AuthApiController::class, 'apiRegister']);
-//     Route::post('/logout', [AuthApiController::class, 'apiLogout'])->middleware('auth:api');
-//     Route::post('/verify', [AuthApiController::class, 'verifyLoginCode']); // Fixed path
-//     Route::post('/verify-password-code', [AuthApiController::class, 'verifyPasswordCode']);
-// });
 
-// // Protected route
-// Route::middleware('auth:api')->get('/profile', function () {
-//     return auth()->user();
-// });
 
 // Public routes (no authentication required)
 Route::prefix('auth')->group(function () {

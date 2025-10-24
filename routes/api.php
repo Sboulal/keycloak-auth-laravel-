@@ -26,8 +26,8 @@ Route::get('/tracking/addresses/{livreurName?}', [TrackingController::class, 'ge
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthApiController::class, 'apiLogin']);
     Route::post('/register', [AuthApiController::class, 'apiRegister']);
-    Route::post('/logout', [AuthApiController::class, 'apiLogout']);
-    Route::post('/verify', [AuthApiController::class, 'verifyLoginCode']);
+    Route::post('/logout', [AuthApiController::class, 'apiLogout'])->middleware('auth:api');
+    Route::post('/verify', [AuthApiController::class, 'verifyLoginCode']); // Fixed path
 });
 
 // Protected route

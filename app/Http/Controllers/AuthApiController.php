@@ -2,293 +2,148 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Services\KeycloakApiService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use App\Notifications\EmailVerificationCode;
 
 class AuthApiController extends Controller
 {
-   protected $keycloakService;
-
-    public function __construct(KeycloakApiService $keycloakService)
+  
+public function apiRegister(Request $request)
     {
-        $this->keycloakService = $keycloakService;
-    }
-
-    /**
-     * Show login form
-     */
-    public function showLoginForm()
-    {
-        return view('auth.login');
-    }
-
-    /**
-     * Handle login request
-     */
-    public function login(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'username' => 'required|string',
-            'password' => 'required|string',
+        $request->validate([
+            'username' => 'required|string|min:3|max:50',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+            'first_name' => 'nullable|string|max:50',
+            'last_name' => 'nullable|string|max:50'
         ]);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+        $user = User::create([
+            'name' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Generate verification code
+        $code = rand(100000, 999999);
+
+        DB::table('email_verifications')->updateOrInsert(
+            ['email' => $user->email],
+            [
+                'code' => $code,
+                'expires_at' => Carbon::now()->addMinutes(10),
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
+        // Send email
+        Mail::raw("Your verification code is: {$code}", function ($message) use ($user) {
+            $message->to($user->email)->subject('Verify Your Account');
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration successful! A verification code has been sent to your email.'
+        ], 201);
+    }
+
+    public function apiLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string'
+        ]);
+
+        $credentials = $request->only('email', 'password');
+
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['success' => false, 'message' => 'Invalid credentials'], 401);
         }
+        
+        $user = Auth::user();
 
-        try {
-            // Authenticate with Keycloak
-            $result = $this->keycloakService->login(
-                $request->username,
-                $request->password
-            );
-           
-          
+        // Check email verification
+        if (!$user->email_verified_at) {
+            $code = rand(100000, 999999);
 
-            // Log the response for debugging
-            Log::info('Keycloak login response', [
-                'success' => $result['success'],
-                'message' => $result['message'] ?? 'No message',
-                'has_data' => isset($result['data'])
-            ]);
-
-            if (!$result['success']) {
-                $errorMessage = $result['message'] ?? 'Authentication failed. Please check your credentials.';
-                
-                // Check for specific error messages
-                if (isset($result['error'])) {
-                    if ($result['error'] === 'invalid_grant') {
-                        $errorMessage = 'Invalid username or password.';
-                    } elseif ($result['error'] === 'user_disabled') {
-                        $errorMessage = 'Your account has been disabled. Please contact support.';
-                    }
-                }
-                
-                return back()->with('error', $errorMessage)->withInput($request->only('username'));
-            }
-
-            // Check if access token exists
-            if (!isset($result['data']['access_token'])) {
-                Log::error('No access token in Keycloak response', ['result' => $result]);
-                return back()->with('error', 'Authentication failed: No access token received.')->withInput($request->only('username'));
-            }
-
-            // Get user info from Keycloak
-            $userInfoResult = $this->keycloakService->getUserInfo($result['data']['access_token']);
-
-            if (!$userInfoResult['success']) {
-                Log::error('Failed to get user info from Keycloak', ['result' => $userInfoResult]);
-                return back()->with('error', 'Failed to retrieve user information.')->withInput($request->only('username'));
-            }
-
-            $keycloakUser = $userInfoResult['data'];
-
-            // Check if email exists
-            if (!isset($keycloakUser['email'])) {
-                Log::error('No email in Keycloak user data', ['user_data' => $keycloakUser]);
-                return back()->with('error', 'User email not found in Keycloak.')->withInput($request->only('username'));
-            }
-
-            // Create or update user in local database
-            $user = User::updateOrCreate(
-                ['email' => $keycloakUser['email']],
+            DB::table('email_verifications')->updateOrInsert(
+                ['email' => $user->email],
                 [
-                    'name' => $keycloakUser['name'] ?? $keycloakUser['preferred_username'] ?? $keycloakUser['email'],
-                    'keycloak_id' => $keycloakUser['sub'],
-                    'email_verified_at' => isset($keycloakUser['email_verified']) && $keycloakUser['email_verified'] ? now() : null,
+                    'code' => $code,
+                    'expires_at' => Carbon::now()->addMinutes(10),
+                    'updated_at' => now(),
+                    'created_at' => now(),
                 ]
             );
 
-            // Store tokens in session
-            session([
-                'keycloak_access_token' => $result['data']['access_token'],
-                'keycloak_refresh_token' => $result['data']['refresh_token'] ?? null,
-                'keycloak_expires_in' => $result['data']['expires_in'] ?? 300,
-                'keycloak_token_time' => now(),
-            ]);
- 
-            // Login user
-            Auth::login($user, $request->has('remember'));
-          // Add session flash notification
-session()->flash('notification', [
-    'type' => 'login',
-    'title' => 'Login Successful',
-    'message' => 'Welcome back! You have successfully logged in.'
-]);
+            Mail::raw("Your verification code is: {$code}", function ($message) use ($user) {
+                $message->to($user->email)->subject('Login Verification Code');
+            });
 
-            return redirect()->intended('/dashboard');
-            
-        } catch (\Exception $e) {
-            Log::error('Login exception', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return back()->with('error', 'An error occurred during login. Please try again.')->withInput($request->only('username'));
+            return response()->json([
+                'success' => false,
+                'require_verification' => true,
+                'message' => 'A verification code has been sent to your email.'
+            ], 202);
         }
-    }
 
-    /**
-     * Show registration form
-     */
-    public function showRegisterForm()
-    {
-        return view('auth.register');
-    }
-
-    /**
-     * Handle registration request
-     */
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'username' => 'required|string|min:3|max:50',
-            'email' => 'required|email|max:255',
-            'first_name' => 'nullable|string|max:100',
-            'last_name' => 'nullable|string|max:100',
-            'password' => 'required|string|min:8|confirmed',
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
+            'user' => $user
         ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        try {
-            // Register user in Keycloak
-            $result = $this->keycloakService->register([
-                'username' => $request->username,
-                'email' => $request->email,
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'password' => $request->password,
-            ]);
-
-            if (!$result['success']) {
-                Log::error('Keycloak registration failed', ['result' => $result]);
-                return back()->with('error', $result['message'])->withInput($request->except('password', 'password_confirmation'));
-            }
-            // Create local user record and send notification
-$user = User::create([
-    'name' => $request->first_name . ' ' . $request->last_name,
-    'email' => $request->email,
-    'password' => bcrypt($request->password),
-]);
-
-// Send registration notification
-$user->notify(new \App\Notifications\UserRegistered($user));
-// Add session flash notification for registration
-session()->flash('notification', [
-    'type' => 'registration',
-    'title' => 'Registration Successful',
-    'message' => 'Your account has been created successfully! Please login.'
-]);
-
-            return redirect()->route('login')
-                ->with('success', 'Registration successful! Please login with your credentials.');
-                
-        } catch (\Exception $e) {
-            Log::error('Registration exception', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return back()->with('error', 'An error occurred during registration. Please try again.')->withInput($request->except('password', 'password_confirmation'));
-        }
     }
 
-    /**
-     * Handle logout request
-     */
-    public function logout(Request $request)
-    {
-        try {
-            $refreshToken = session('keycloak_refresh_token');
 
-            if ($refreshToken) {
-                $this->keycloakService->logout($refreshToken);
-            }
+public function verifyLoginCode(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'code' => 'required|string'
+    ]);
 
-            Auth::logout();
-            
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+    $record = DB::table('email_verifications')->where('email', $request->email)->first();
 
-            return redirect('/')->with('success', 'You have been logged out successfully.');
-            
-        } catch (\Exception $e) {
-            Log::error('Logout exception', [
-                'error' => $e->getMessage()
-            ]);
-            
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            
-            return redirect('/');
-        }
-    }
- /**
-     * Redirect to Google OAuth
-     */
-    public function redirectToGoogle()
-    {
-        return Socialite::driver('google')
-            ->redirect();
+    if (!$record) {
+        return response()->json(['success' => false, 'message' => 'No verification record found'], 404);
     }
 
-    /**
-     * Handle Google OAuth Callback
-     */
-    public function handleGoogleCallback(Request $request)
-    {
-        try {
-            $googleUser = Socialite::driver('google')->user();
-            
-            // Rechercher l'utilisateur par email
-            $user = User::where('email', $googleUser->getEmail())->first();
-
-            if (!$user) {
-                // Créer un nouvel utilisateur
-                $user = User::create([
-                    'name' => $googleUser->getName(),
-                    'email' => $googleUser->getEmail(),
-                    'google_id' => $googleUser->getId(),
-                    'password' => bcrypt(Str::random(32)),
-                    'email_verified_at' => now(),
-                ]);
-                
-                Log::info('New user created via Google', ['email' => $user->email]);
-            } else {
-                // Mettre à jour google_id si vide
-                if (!$user->google_id) {
-                    $user->update(['google_id' => $googleUser->getId()]);
-                }
-            }
-
-            // Authentifier l'utilisateur
-            Auth::login($user, true);
-            // Add session flash notification
-session()->flash('notification', [
-    'type' => 'login',
-    'title' => 'Google Login Successful',
-    'message' => 'Welcome! You have successfully logged in with Google.'
-]);
-
-
-            Log::info('User logged in via Google', ['user_id' => $user->id, 'email' => $user->email]);
-
-            return redirect()->intended('/dashboard');
-            
-        } catch (\Exception $e) {
-            Log::error('Google Auth Error: ' . $e->getMessage());
-            return redirect('/login')->with('error', 'Authentication failed. Please try again.');
-        }
+    if ($record->code !== $request->code) {
+        return response()->json(['success' => false, 'message' => 'Invalid code'], 400);
     }
+
+    if (Carbon::parse($record->expires_at)->isPast()) {
+        return response()->json(['success' => false, 'message' => 'Code expired'], 400);
+    }
+
+    $user = \App\Models\User::where('email', $request->email)->first();
+    if ($user) {
+        $user->update(['email_verified_at' => now()]);
+    }
+
+    DB::table('email_verifications')->where('email', $request->email)->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Email verified successfully. You can now log in.'
+    ]);
+}
+
 }

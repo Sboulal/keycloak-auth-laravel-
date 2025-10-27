@@ -30,6 +30,7 @@ class RegisterController extends Controller
      * @response 201 {
      *   "success": true,
      *   "message": "Registration successful! Please accept the terms and conditions to continue.",
+     *   "user_id": 1,
      *   "email": "johndoe@example.com",
      *   "next_step": "accept_terms"
      * }
@@ -40,6 +41,11 @@ class RegisterController extends Controller
      *   "errors": {
      *     "email": ["The email has already been taken."]
      *   }
+     * }
+     * 
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Registration failed: Database connection error"
      * }
      */
     public function register(Request $request)
@@ -65,6 +71,7 @@ class RegisterController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Registration successful! Please accept the terms and conditions to continue.',
+                'user_id' => $user->id,
                 'email' => $user->email,
                 'next_step' => 'accept_terms'
             ], 201);

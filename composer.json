@@ -22,7 +22,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "./packages/saboulal/jwt-auth",
+            "url": "https://github.com/Sboulal/jwt-auth-",
             "options": {
                 "symlink": true
             }

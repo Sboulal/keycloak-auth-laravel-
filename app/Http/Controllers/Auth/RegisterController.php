@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use App\Services\EmailVerificationService;
 
 /**
  * @group Authentication - Registration
@@ -16,17 +15,11 @@ use App\Services\EmailVerificationService;
  */
 class RegisterController extends Controller
 {
-    protected $verificationService;
-
-    public function __construct(EmailVerificationService $verificationService)
-    {
-        $this->verificationService = $verificationService;
-    }
-
     /**
      * Register a new user
      * 
-     * Creates a new user account and sends a verification code to the provided email address.
+     * Creates a new user account WITHOUT sending verification code.
+     * User must accept terms in next step before receiving verification code.
      * 
      * @bodyParam username string required The username for the account. Example: johndoe
      * @bodyParam email string required The email address. Must be unique. Example: johndoe@example.com
@@ -36,13 +29,14 @@ class RegisterController extends Controller
      * 
      * @response 201 {
      *   "success": true,
-     *   "message": "Registration successful! A verification code has been sent to your email.",
+     *   "message": "Registration successful! Please accept the terms and conditions to continue.",
      *   "email": "johndoe@example.com",
-     *   "debug_code": "123456"
+     *   "next_step": "accept_terms"
      * }
      * 
      * @response 422 {
-     *   "message": "The email has already been taken.",
+     *   "success": false,
+     *   "message": "Validation failed",
      *   "errors": {
      *     "email": ["The email has already been taken."]
      *   }
@@ -59,20 +53,20 @@ class RegisterController extends Controller
                 'last_name' => 'nullable|string|max:50'
             ]);
 
+            // Create user with status = 0 (pending) - waiting for terms acceptance
             $user = User::create([
                 'name' => $request->username,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'status' => 0, // Pending - waiting for terms acceptance
+                'terms_accepted' => false,
             ]);
-
-            // Send verification code via service
-            $code = $this->verificationService->sendVerificationCode($user->email);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Registration successful! A verification code has been sent to your email.',
+                'message' => 'Registration successful! Please accept the terms and conditions to continue.',
                 'email' => $user->email,
-                'debug_code' => config('app.debug') ? $code : null
+                'next_step' => 'accept_terms'
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {

@@ -6,7 +6,9 @@ use App\Http\Controllers\AuthApiController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\Auth\AcceptConditionsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,10 +20,6 @@ use App\Http\Controllers\Auth\VerificationController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 
 
@@ -39,11 +37,21 @@ Route::prefix('auth')->group(function () {
     // Email Verification
     Route::post('/verify-email', [VerificationController::class, 'verifyEmail']);
     Route::post('/resend-verification', [VerificationController::class, 'resendVerificationCode']);
+
+     // Terms and Conditions (NEW - must be called after registration, before email verification)
+    Route::post('/accept-conditions', [AcceptConditionsController::class, 'acceptConditions']);
+    Route::post('/terms-status', [AcceptConditionsController::class, 'checkStatus']);
     
     // Password Reset
-    Route::post('/forgot-password', [VerificationController::class, 'requestPasswordReset']);
-    Route::post('/verify-password-reset', [VerificationController::class, 'verifyPasswordReset']);
-    Route::post('/resend-password-reset', [VerificationController::class, 'resendPasswordResetCode']);
+    // Route::post('/forgot-password', [VerificationController::class, 'requestPasswordReset']);
+    // Route::post('/verify-password-reset', [VerificationController::class, 'verifyPasswordReset']);
+    // Route::post('/resend-password-reset', [VerificationController::class, 'resendPasswordResetCode']);
+  
+});
+
+Route::prefix('auth/google')->group(function () {
+    Route::get('redirect', [GoogleAuthController::class, 'redirectToGoogle']);
+    Route::get('callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 });
 
 // Protected routes (authentication required)

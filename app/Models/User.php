@@ -21,6 +21,9 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'email_verified_at',
+        'status',
+        'terms_accepted',
+        'terms_accepted_at',
     ];
 
     /**
@@ -31,6 +34,8 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+        'terms_accepted' => 'boolean',
+        'terms_accepted_at' => 'datetime',
     ];
 
     /**
@@ -64,5 +69,46 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+       /**
+     * Check if user is active
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->status === 1;
+    }
+
+    /**
+     * Check if user has accepted terms
+     *
+     * @return bool
+     */
+    public function hasAcceptedTerms()
+    {
+        return $this->terms_accepted === true;
+    }
+
+    /**
+     * Status constants
+     */
+    const STATUS_PENDING = 0;
+    const STATUS_ACTIVE = 1;
+    const STATUS_SUSPENDED = 2;
+
+    /**
+     * Get status label
+     *
+     * @return string
+     */
+    public function getStatusLabelAttribute()
+    {
+        return match($this->status) {
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_ACTIVE => 'Active',
+            self::STATUS_SUSPENDED => 'Suspended',
+            default => 'Unknown',
+        };
     }
 }

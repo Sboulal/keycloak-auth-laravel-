@@ -83,6 +83,7 @@ class LoginController extends Controller
 
             // Send verification code
             $code = $this->verificationService->sendVerificationCode($request->email);
+         
 
             return response()->json([
                 'success' => true,

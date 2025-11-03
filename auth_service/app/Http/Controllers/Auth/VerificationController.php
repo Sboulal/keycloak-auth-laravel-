@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Services\EmailVerificationService;
 use App\Services\PasswordResetService;
 
+
+
 /**
  * @group Authentication - Verification
  * 
@@ -103,6 +105,69 @@ class VerificationController extends Controller
             ]
         ]);
     }
+
+    /**
+ * Check if JWT token is valid
+ * 
+ * This endpoint verifies if a provided JWT token is still valid.
+ * 
+ * @header Authorization string required The Bearer token. Example: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+ * 
+ * @response 200 {
+ *   "success": true,
+ *   "message": "Token is valid",
+ *   "user": {
+ *     "id": 1,
+ *     "name": "John Doe",
+ *     "email": "john@example.com"
+ *   }
+ * }
+ * 
+ * @response 401 {
+ *   "success": false,
+ *   "message": "Token is invalid or expired"
+ * }
+ */
+public function checkToken(Request $request)
+{
+    try {
+        // Vérifie si le token est valide
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Token is valid',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email
+            ]
+        ], 200);
+
+    } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Token has expired'
+        ], 401);
+    } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Token is invalid'
+        ], 401);
+    } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Token is missing'
+        ], 400);
+    }
+}
 
     /**
      * Resend verification code

@@ -1,0 +1,11 @@
+{
+    "name": "ColisManagment",
+    "alias": "colismanagment",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ColisManagment\\Providers\\ColisManagmentServiceProvider"
+    ],
+    "files": []
+}

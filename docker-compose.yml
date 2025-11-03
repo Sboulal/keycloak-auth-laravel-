@@ -1,6 +1,8 @@
 services:
   nginx-gateway:
-    image: openresty/openresty:alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     container_name: nginx-gateway
     ports:
       - "8087:80"
@@ -31,10 +33,9 @@ services:
     depends_on:
       - auth_postgres
     env_file:
-      - ./auth_service/.env  # Load all env vars from .env file
+      - ./auth_service/.env
     environment:
-      # Override specific variables for Docker
-      - DB_HOST=auth_postgres  # Match the service name below
+      - DB_HOST=auth_postgres
       - DB_DATABASE=packages-management
     networks:
       - laravel_net
@@ -55,13 +56,13 @@ services:
     image: postgres:15
     container_name: pkg-manage-auth-db
     environment:
-      POSTGRES_DB: packages-management  # Match your .env
+      POSTGRES_DB: packages-management
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
       - auth_pgdata:/var/lib/postgresql/data
     ports:
-      - "5433:5432"  # Expose for debugging if needed
+      - "5433:5432"
     networks:
       - laravel_net
 

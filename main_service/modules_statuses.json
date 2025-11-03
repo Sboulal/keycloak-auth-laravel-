@@ -1,0 +1,7 @@
+{
+    "Core": true,
+    "Payment": true,
+    "Managment": true,
+    "ColisManagment": true,
+    "UserManagment": true
+}

@@ -1,15 +1,212 @@
-2025/10/31 11:00:47 [error] 7#7: *1 open() "/usr/local/openresty/nginx/html/favicon.ico" failed (2: No such file or directory), client: 172.20.0.1, server: _, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8087", referrer: "http://localhost:8087/"
-2025/10/31 11:02:24 [error] 9#9: *3 open() "/usr/local/openresty/nginx/html/favicon.ico" failed (2: No such file or directory), client: 172.20.0.1, server: _, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8087", referrer: "http://localhost:8087/"
-2025/10/31 11:08:47 [error] 8#8: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: _, request: "GET //api/auth/login/ HTTP/1.1", upstream: "http://172.20.0.4:8001/api/auth/login/", host: "localhost:8087"
-2025/10/31 11:08:53 [error] 8#8: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: _, request: "GET /api/auth/login/ HTTP/1.1", upstream: "http://172.20.0.4:8001/api/auth/login/", host: "localhost:8087"
-2025/10/31 11:08:57 [error] 8#8: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: _, request: "GET /api/auth/login/ HTTP/1.1", upstream: "http://172.20.0.4:8001/api/auth/login/", host: "localhost:8087"
-2025/10/31 11:09:10 [error] 8#8: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: _, request: "GET /api/auth/login/ HTTP/1.1", upstream: "http://172.20.0.4:8001/api/auth/login/", host: "localhost:8087"
-2025/10/31 11:09:50 [error] 8#8: *1 lua entry thread aborted: runtime error: error loading module 'auth' from file '/usr/local/openresty/lualib/custom/auth.lua':
-	/usr/local/openresty/lualib/custom/auth.lua:89: 'then' expected near 'k'
+2025/11/03 15:49:40 [error] 7#7: *1 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/custom/auth.lua:2: module 'resty.http' not found:
+	no field package.preload['resty.http']
+	no file '/usr/local/openresty/lualib/custom/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.lua'
+	no file '/usr/local/openresty/lualib/resty/http.lua'
+	no file '/usr/local/openresty/lualib/resty/http/init.lua'
+	no file './resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.so'
+	no file '/usr/local/openresty/lualib/resty/http.so'
+	no file './resty/http.so'
+	no file '/usr/local/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/resty.so'
+	no file '/usr/local/openresty/lualib/resty.so'
+	no file './resty.so'
+	no file '/usr/local/lib/lua/5.1/resty.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
 stack traceback:
 coroutine 0:
 	[C]: in function 'require'
-	content_by_lua(/etc/nginx/conf.d/default.conf:14):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/ HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
-2025/10/31 11:09:50 [error] 8#8: *1 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/ HTTP/1.1", host: "localhost:8087"
-2025/10/31 11:17:28 [error] 7#7: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: _, request: "GET /api/auth/register HTTP/1.1", upstream: "http://172.20.0.4:8001/register", host: "localhost:8087"
-2025/10/31 11:26:03 [error] 8#8: *1 open() "/usr/local/openresty/nginx/html/api" failed (2: No such file or directory), client: 172.20.0.1, server: _, request: "GET /api HTTP/1.1", host: "localhost:8087"
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 15:49:40 [error] 7#7: *1 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test HTTP/1.1", host: "localhost:8087"
+2025/11/03 15:49:43 [error] 9#9: *2 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/custom/auth.lua:2: module 'resty.http' not found:
+	no field package.preload['resty.http']
+	no file '/usr/local/openresty/lualib/custom/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.lua'
+	no file '/usr/local/openresty/lualib/resty/http.lua'
+	no file '/usr/local/openresty/lualib/resty/http/init.lua'
+	no file './resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.so'
+	no file '/usr/local/openresty/lualib/resty/http.so'
+	no file './resty/http.so'
+	no file '/usr/local/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/resty.so'
+	no file '/usr/local/openresty/lualib/resty.so'
+	no file './resty.so'
+	no file '/usr/local/lib/lua/5.1/resty.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 15:49:43 [error] 9#9: *2 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test HTTP/1.1", host: "localhost:8087"
+2025/11/03 15:56:17 [error] 7#7: *9 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/resty/core/base.lua:80: loop or previous error loading module 'custom.auth'
+stack traceback:
+coroutine 0:
+	[C]: in function 'error'
+	/usr/local/openresty/lualib/resty/core/base.lua:80: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 15:56:17 [error] 7#7: *9 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test HTTP/1.1", host: "localhost:8087"
+2025/11/03 15:58:43 [error] 7#7: *12 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/resty/core/base.lua:80: loop or previous error loading module 'custom.auth'
+stack traceback:
+coroutine 0:
+	[C]: in function 'error'
+	/usr/local/openresty/lualib/resty/core/base.lua:80: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDEvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTc4MzY1LCJleHAiOjE3NjIxODE5NjUsIm5iZiI6MTc2MjE3ODM2NSwianRpIjoiOFdzVGxTdm9PdXE4c09rWiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.CVe8sa4voxaC7wotZW4abfSkEnRjoMbiG3sIeTHBFgw&Content-Type=application/json HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 15:58:43 [error] 7#7: *12 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDEvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTc4MzY1LCJleHAiOjE3NjIxODE5NjUsIm5iZiI6MTc2MjE3ODM2NSwianRpIjoiOFdzVGxTdm9PdXE4c09rWiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.CVe8sa4voxaC7wotZW4abfSkEnRjoMbiG3sIeTHBFgw&Content-Type=application/json HTTP/1.1", host: "localhost:8087"
+2025/11/03 16:01:02 [error] 7#7: *14 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/resty/core/base.lua:80: loop or previous error loading module 'custom.auth'
+stack traceback:
+coroutine 0:
+	[C]: in function 'error'
+	/usr/local/openresty/lualib/resty/core/base.lua:80: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDEvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTc4MzY1LCJleHAiOjE3NjIxODE5NjUsIm5iZiI6MTc2MjE3ODM2NSwianRpIjoiOFdzVGxTdm9PdXE4c09rWiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.CVe8sa4voxaC7wotZW4abfSkEnRjoMbiG3sIeTHBFgw&Content-Type=application/json HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 16:01:02 [error] 7#7: *14 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDEvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTc4MzY1LCJleHAiOjE3NjIxODE5NjUsIm5iZiI6MTc2MjE3ODM2NSwianRpIjoiOFdzVGxTdm9PdXE4c09rWiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.CVe8sa4voxaC7wotZW4abfSkEnRjoMbiG3sIeTHBFgw&Content-Type=application/json HTTP/1.1", host: "localhost:8087"
+2025/11/03 16:06:11 [error] 7#7: *19 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/resty/core/base.lua:80: loop or previous error loading module 'custom.auth'
+stack traceback:
+coroutine 0:
+	[C]: in function 'error'
+	/usr/local/openresty/lualib/resty/core/base.lua:80: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDEvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTc4MzY1LCJleHAiOjE3NjIxODE5NjUsIm5iZiI6MTc2MjE3ODM2NSwianRpIjoiOFdzVGxTdm9PdXE4c09rWiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.CVe8sa4voxaC7wotZW4abfSkEnRjoMbiG3sIeTHBFgw&Content-Type=application/json HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 16:06:11 [error] 7#7: *19 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDEvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTc4MzY1LCJleHAiOjE3NjIxODE5NjUsIm5iZiI6MTc2MjE3ODM2NSwianRpIjoiOFdzVGxTdm9PdXE4c09rWiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.CVe8sa4voxaC7wotZW4abfSkEnRjoMbiG3sIeTHBFgw&Content-Type=application/json HTTP/1.1", host: "localhost:8087"
+2025/11/03 16:10:26 [error] 7#7: *22 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/resty/core/base.lua:80: loop or previous error loading module 'custom.auth'
+stack traceback:
+coroutine 0:
+	[C]: in function 'error'
+	/usr/local/openresty/lualib/resty/core/base.lua:80: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDEvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTc4MzY1LCJleHAiOjE3NjIxODE5NjUsIm5iZiI6MTc2MjE3ODM2NSwianRpIjoiOFdzVGxTdm9PdXE4c09rWiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.CVe8sa4voxaC7wotZW4abfSkEnRjoMbiG3sIeTHBFgw&Content-Type=application/json HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 16:10:26 [error] 7#7: *22 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDEvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTc4MzY1LCJleHAiOjE3NjIxODE5NjUsIm5iZiI6MTc2MjE3ODM2NSwianRpIjoiOFdzVGxTdm9PdXE4c09rWiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.CVe8sa4voxaC7wotZW4abfSkEnRjoMbiG3sIeTHBFgw&Content-Type=application/json HTTP/1.1", host: "localhost:8087"
+2025/11/03 16:20:20 [error] 8#8: *2 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/custom/auth.lua:1: module 'resty.http' not found:
+	no field package.preload['resty.http']
+	no file '/usr/local/openresty/lualib/custom/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.lua'
+	no file '/usr/local/openresty/lualib/resty/http.lua'
+	no file '/usr/local/openresty/lualib/resty/http/init.lua'
+	no file './resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.so'
+	no file '/usr/local/openresty/lualib/resty/http.so'
+	no file './resty/http.so'
+	no file '/usr/local/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/resty.so'
+	no file '/usr/local/openresty/lualib/resty.so'
+	no file './resty.so'
+	no file '/usr/local/lib/lua/5.1/resty.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "POST /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXV0aC1zZXJ2aWNlOjgwMDAvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTg2Nzg4LCJleHAiOjE3NjIxOTAzODgsIm5iZiI6MTc2MjE4Njc4OCwianRpIjoiMDVOY29RWUk3NFZTQnFFNSIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.W8C6Q-F5k0U52L2hFKNzJ5_90-p887iblLGxP-L6h60&Content-Type=application/json HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 16:20:20 [error] 8#8: *2 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "POST /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXV0aC1zZXJ2aWNlOjgwMDAvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTg2Nzg4LCJleHAiOjE3NjIxOTAzODgsIm5iZiI6MTc2MjE4Njc4OCwianRpIjoiMDVOY29RWUk3NFZTQnFFNSIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.W8C6Q-F5k0U52L2hFKNzJ5_90-p887iblLGxP-L6h60&Content-Type=application/json HTTP/1.1", host: "localhost:8087"
+2025/11/03 16:20:25 [error] 10#10: *6 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/custom/auth.lua:1: module 'resty.http' not found:
+	no field package.preload['resty.http']
+	no file '/usr/local/openresty/lualib/custom/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.lua'
+	no file '/usr/local/openresty/lualib/resty/http.lua'
+	no file '/usr/local/openresty/lualib/resty/http/init.lua'
+	no file './resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.so'
+	no file '/usr/local/openresty/lualib/resty/http.so'
+	no file './resty/http.so'
+	no file '/usr/local/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/resty.so'
+	no file '/usr/local/openresty/lualib/resty.so'
+	no file './resty.so'
+	no file '/usr/local/lib/lua/5.1/resty.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXV0aC1zZXJ2aWNlOjgwMDAvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTg2Nzg4LCJleHAiOjE3NjIxOTAzODgsIm5iZiI6MTc2MjE4Njc4OCwianRpIjoiMDVOY29RWUk3NFZTQnFFNSIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.W8C6Q-F5k0U52L2hFKNzJ5_90-p887iblLGxP-L6h60&Content-Type=application/json HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 16:20:25 [error] 10#10: *6 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXV0aC1zZXJ2aWNlOjgwMDAvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTg2Nzg4LCJleHAiOjE3NjIxOTAzODgsIm5iZiI6MTc2MjE4Njc4OCwianRpIjoiMDVOY29RWUk3NFZTQnFFNSIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.W8C6Q-F5k0U52L2hFKNzJ5_90-p887iblLGxP-L6h60&Content-Type=application/json HTTP/1.1", host: "localhost:8087"
+2025/11/03 16:20:26 [error] 7#7: *7 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/custom/auth.lua:1: module 'resty.http' not found:
+	no field package.preload['resty.http']
+	no file '/usr/local/openresty/lualib/custom/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http.ljbc'
+	no file '/usr/local/openresty/lualib/resty/http/init.ljbc'
+	no file '/usr/local/openresty/site/lualib/resty/http.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http/init.lua'
+	no file '/usr/local/openresty/lualib/resty/http.lua'
+	no file '/usr/local/openresty/lualib/resty/http/init.lua'
+	no file './resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/luajit-2.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http.lua'
+	no file '/usr/local/openresty/luajit/share/lua/5.1/resty/http/init.lua'
+	no file '/usr/local/openresty/site/lualib/resty/http.so'
+	no file '/usr/local/openresty/lualib/resty/http.so'
+	no file './resty/http.so'
+	no file '/usr/local/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty/http.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+	no file '/usr/local/openresty/site/lualib/resty.so'
+	no file '/usr/local/openresty/lualib/resty.so'
+	no file './resty.so'
+	no file '/usr/local/lib/lua/5.1/resty.so'
+	no file '/usr/local/openresty/luajit/lib/lua/5.1/resty.so'
+	no file '/usr/local/lib/lua/5.1/loadall.so'
+stack traceback:
+coroutine 0:
+	[C]: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXV0aC1zZXJ2aWNlOjgwMDAvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTg2Nzg4LCJleHAiOjE3NjIxOTAzODgsIm5iZiI6MTc2MjE4Njc4OCwianRpIjoiMDVOY29RWUk3NFZTQnFFNSIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.W8C6Q-F5k0U52L2hFKNzJ5_90-p887iblLGxP-L6h60&Content-Type=application/json HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 16:20:26 [error] 7#7: *7 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXV0aC1zZXJ2aWNlOjgwMDAvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTg2Nzg4LCJleHAiOjE3NjIxOTAzODgsIm5iZiI6MTc2MjE4Njc4OCwianRpIjoiMDVOY29RWUk3NFZTQnFFNSIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.W8C6Q-F5k0U52L2hFKNzJ5_90-p887iblLGxP-L6h60&Content-Type=application/json HTTP/1.1", host: "localhost:8087"
+2025/11/03 16:20:27 [error] 7#7: *10 lua entry thread aborted: runtime error: /usr/local/openresty/lualib/resty/core/base.lua:80: loop or previous error loading module 'custom.auth'
+stack traceback:
+coroutine 0:
+	[C]: in function 'error'
+	/usr/local/openresty/lualib/resty/core/base.lua:80: in function 'require'
+	content_by_lua(/etc/nginx/conf.d/default.conf:12):2: in main chunk, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXV0aC1zZXJ2aWNlOjgwMDAvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTg2Nzg4LCJleHAiOjE3NjIxOTAzODgsIm5iZiI6MTc2MjE4Njc4OCwianRpIjoiMDVOY29RWUk3NFZTQnFFNSIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.W8C6Q-F5k0U52L2hFKNzJ5_90-p887iblLGxP-L6h60&Content-Type=application/json HTTP/1.1", subrequest: "/_auth", host: "localhost:8087"
+2025/11/03 16:20:27 [error] 7#7: *10 auth request unexpected status: 500, client: 172.20.0.1, server: _, request: "GET /api/main/prv/test?Authorization=Bearer%20eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXV0aC1zZXJ2aWNlOjgwMDAvYXBpL2F1dGgvdmVyaWZ5LWVtYWlsIiwiaWF0IjoxNzYyMTg2Nzg4LCJleHAiOjE3NjIxOTAzODgsIm5iZiI6MTc2MjE4Njc4OCwianRpIjoiMDVOY29RWUk3NFZTQnFFNSIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.W8C6Q-F5k0U52L2hFKNzJ5_90-p887iblLGxP-L6h60&Content-Type=application/json HTTP/1.1", host: "localhost:8087"

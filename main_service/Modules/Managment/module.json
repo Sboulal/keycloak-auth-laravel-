@@ -1,0 +1,11 @@
+{
+    "name": "Managment",
+    "alias": "managment",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Managment\\Providers\\ManagmentServiceProvider"
+    ],
+    "files": []
+}

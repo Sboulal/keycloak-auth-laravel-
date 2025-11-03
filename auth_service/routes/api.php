@@ -37,10 +37,13 @@ Route::prefix('auth')->group(function () {
     // Email Verification
     Route::post('/verify-email', [VerificationController::class, 'verifyEmail']);
     Route::post('/resend-verification', [VerificationController::class, 'resendVerificationCode']);
+    Route::get('/check-token', [VerificationController::class, 'checkToken']);
+
 
      // Terms and Conditions (NEW - must be called after registration, before email verification)
     Route::post('/accept-conditions', [AcceptConditionsController::class, 'acceptConditions']);
     Route::post('/terms-status', [AcceptConditionsController::class, 'checkStatus']);
+
     
     // Password Reset
     // Route::post('/forgot-password', [VerificationController::class, 'requestPasswordReset']);

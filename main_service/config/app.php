@@ -184,5 +184,5 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
-
+    'fake_auth_enabled' => env('FAKE_AUTH_ENABLED', false),
 ];

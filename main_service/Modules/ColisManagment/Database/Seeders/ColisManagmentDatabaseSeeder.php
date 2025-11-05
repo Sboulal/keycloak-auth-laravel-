@@ -4,6 +4,10 @@ namespace Modules\ColisManagment\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\ColisManagment\Database\Seeders\ColisManagementTestSeederTableSeeder;
+use Modules\ColisManagment\Database\Seeders\CitiesSeederTableSeeder;
+use Modules\ColisManagment\Database\Seeders\DeliveryTypesSeederTableSeeder;
+use Modules\ColisManagment\Database\Seeders\RegionTypePricingSeederTableSeeder;
 
 class ColisManagmentDatabaseSeeder extends Seeder
 {
@@ -12,10 +16,13 @@ class ColisManagmentDatabaseSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+     public function run()
     {
-        Model::unguard();
-
-        // $this->call("OthersTableSeeder");
+        $this->call([
+            // ColisManagementTestSeederTableSeeder::class,
+            CitiesSeederTableSeeder::class,
+            DeliveryTypesSeederTableSeeder::class,
+            // RegionTypePricingSeederTableSeeder::class,
+        ]);
     }
 }

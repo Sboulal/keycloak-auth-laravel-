@@ -14,7 +14,11 @@ RUN apk add --no-cache \
     icu-dev \
     nodejs \
     npm \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip intl bcmath opcache
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql mbstring zip intl bcmath opcache
 
 # 3. Installer Composer (copié depuis l'image officielle)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

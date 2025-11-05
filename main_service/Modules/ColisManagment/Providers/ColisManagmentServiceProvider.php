@@ -5,6 +5,7 @@ namespace Modules\ColisManagment\Providers;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\ColisManagment\Http\Middleware\FakeAuthMiddleware;
 
 class ColisManagmentServiceProvider extends ServiceProvider
 {
@@ -29,6 +30,8 @@ class ColisManagmentServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
+        $this->app['router']->aliasMiddleware('fake.auth', FakeAuthMiddleware::class);
+        $this->loadRoutesFrom(__DIR__.'/../Routes/api.php');
     }
 
     /**

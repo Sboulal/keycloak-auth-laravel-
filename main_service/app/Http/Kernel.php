@@ -57,5 +57,9 @@ class Kernel extends HttpKernel
         
         // Custom gateway auth middleware
         'gateway.auth' => \App\Http\Middleware\GatewayAuthMiddleware::class,
+       'fake.auth' => \Modules\ColisManagment\Http\Middleware\FakeAuthMiddleware::class,
+         'role' => \App\Http\Middleware\CheckRole::class,
+
+
     ];
 }

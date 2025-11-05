@@ -2,7 +2,6 @@ services:
   nginx-gateway:
     build:
       context: ./nginx
-      dockerfile: Dockerfile
     container_name: nginx-gateway
     ports:
       - "8087:80"
@@ -49,8 +48,13 @@ services:
       - "6500:6500"
     volumes:
       - ./main_service:/var/www
+    environment:
+      - DB_HOST=auth_postgres
+      - DB_DATABASE=packages-management
+      - FAKE_AUTH_ENABLED=true
     networks:
       - laravel_net
+
 
   auth_postgres:
     image: postgres:15

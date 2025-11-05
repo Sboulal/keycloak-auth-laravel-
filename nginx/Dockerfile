@@ -1,17 +1,13 @@
 FROM openresty/openresty:alpine
 
-# Install lua-resty-http
-RUN apk add --no-cache git make gcc musl-dev \
-    && cd /tmp \
-    && git clone https://github.com/ledgetech/lua-resty-http.git \
-    && cd lua-resty-http \
-    && make install \
-    && cd / \
-    && rm -rf /tmp/lua-resty-http
+# Install Perl for opm and any other dependencies
+RUN apk add --no-cache perl
 
-# Create custom lua directory
-RUN mkdir -p /usr/local/openresty/lualib/custom
+# Install lua-resty-http via OPM (OpenResty Package Manager)
+# RUN /usr/local/openresty/bin/opm get ledgetech/lua-resty-http
 
-EXPOSE 80 443
+# Expose ports
+EXPOSE 87 443
 
-CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
+# Default command
+CMD ["openresty", "-g", "daemon off;"]

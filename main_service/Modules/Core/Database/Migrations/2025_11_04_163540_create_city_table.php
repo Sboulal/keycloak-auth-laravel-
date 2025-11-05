@@ -6,20 +6,26 @@ use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('city', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('code_city');
-            $table->float('latitude');
-            $table->float('longitude');
+            $table->string('code_city')->nullable();
+            $table->float('latitude')->nullable();
+            $table->float('longitude')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::dropIfExists('city');
     }

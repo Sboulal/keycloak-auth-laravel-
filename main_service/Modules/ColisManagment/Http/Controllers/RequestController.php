@@ -1,10 +1,8 @@
 <?php
 
-// namespace Modules\ColisManagment\Http\Controllers\Controller;
-
 namespace Modules\ColisManagment\Http\Controllers;
-use Modules\Core\Entities\City;
 
+use Modules\Core\Entities\City;
 use Modules\Core\Entities\Center;
 use Nwidart\Modules\Routing\Controller;
 use App\Http\Requests\SaveRequestRequest;
@@ -15,9 +13,11 @@ use Modules\ColisManagment\Services\RequestService;
 use Modules\ColisManagment\Entities\RegionTypePricing;
 use Modules\ColisManagment\Transformers\RequestResource;
 
-
-
-
+/**
+ * @group Request Management
+ *
+ * APIs for managing package delivery requests
+ */
 class RequestController extends Controller
 {
     protected $requestService;
@@ -28,46 +28,122 @@ class RequestController extends Controller
     }
 
     /**
-     * GET /api/requests/prepare-data
-     * Préparer les données nécessaires pour créer une demande
+     * Prepare Request Data
+     * 
+     * Get all necessary data for creating a request (cities, centers, delivery types, pricing)
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "cities": [
+     *       {
+     *         "id": 1,
+     *         "name": "Casablanca"
+     *       }
+     *     ],
+     *     "centers": {
+     *       "Casablanca": [
+     *         {
+     *           "id": 1,
+     *           "name": "Centre Maarif",
+     *           "city": {
+     *             "id": 1,
+     *             "name": "Casablanca"
+     *           }
+     *         }
+     *       ]
+     *     },
+     *     "delivery_types": [
+     *       {
+     *         "id": 1,
+     *         "name": "Express",
+     *         "description": "Livraison en 24h"
+     *       }
+     *     ],
+     *     "pricing": {
+     *       "Casablanca": [
+     *         {
+     *           "id": 1,
+     *           "city_id": 1,
+     *           "delivery_type_id": 1,
+     *           "price": 25.00,
+     *           "city": {
+     *             "id": 1,
+     *             "name": "Casablanca"
+     *           },
+     *           "deliveryType": {
+     *             "id": 1,
+     *             "name": "Express"
+     *           }
+     *         }
+     *       ]
+     *     }
+     *   },
+     *   "message": "Données chargées avec succès"
+     * }
+     * 
+     * @response 500 scenario="Server Error" {
+     *   "success": false,
+     *   "message": "Erreur lors du chargement des données: Database connection failed"
+     * }
      */
-   public function prepareRequestData()
-{
-    try {
-        $cities = City::select('id', 'name')->get();
+    public function prepareRequestData()
+    {
+        try {
+            $cities = City::select('id', 'name')->get();
 
-        $centers = Center::with('city:id,name')
-            ->get()
-            ->groupBy('city.name');
+            $centers = Center::with('city:id,name')
+                ->get()
+                ->groupBy('city.name');
 
-        $deliveryTypes = DeliveryType::get();
+            $deliveryTypes = DeliveryType::get();
 
-        $pricing = RegionTypePricing::with(['city:id,name', 'deliveryType:id,name'])
-            ->get()
-            ->groupBy('city.name');
+            $pricing = RegionTypePricing::with(['city:id,name', 'deliveryType:id,name'])
+                ->get()
+                ->groupBy('city.name');
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'cities' => $cities,
-                'centers' => $centers,
-                'delivery_types' => $deliveryTypes,
-                'pricing' => $pricing,
-            ],
-            'message' => 'Données chargées avec succès'
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Erreur lors du chargement des données: ' . $e->getMessage()
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'cities' => $cities,
+                    'centers' => $centers,
+                    'delivery_types' => $deliveryTypes,
+                    'pricing' => $pricing,
+                ],
+                'message' => 'Données chargées avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du chargement des données: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
-
 
     /**
-     * POST /api/requests/search-address
-     * Rechercher une adresse (intégration avec Google Maps API)
+     * Search Address
+     * 
+     * Search for an address using query string (Google Maps integration placeholder)
+     *
+     * @bodyParam query string required The address search query. Must be at least 3 characters. Example: Casablanca Maarif
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "address": "Casablanca Maarif",
+     *     "latitude": 33.5731,
+     *     "longitude": -7.5898
+     *   }
+     * }
+     * 
+     * @response 422 scenario="Validation Error" {
+     *   "message": "The query field is required.",
+     *   "errors": {
+     *     "query": [
+     *       "The query field is required."
+     *     ]
+     *   }
+     * }
      */
     public function searchAddress(HttpRequest $request)
     {
@@ -76,7 +152,6 @@ class RequestController extends Controller
         ]);
 
         // TODO: Intégrer Google Maps Geocoding API
-        // Pour l'instant, retour mock
         return response()->json([
             'success' => true,
             'data' => [
@@ -87,69 +162,73 @@ class RequestController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/requests
-     * Créer ou mettre à jour une demande
-     */
-    public function saveRequest(SaveRequestRequest $request)
-    {
-        try {
-            $user = auth()->user();
-            $data = $request->validated();
-
-            if ($request->has('id') && $request->id) {
-                // Mise à jour
-                $requestModel = $this->requestService->updateRequest($request->id, $data, $user);
-                $message = 'Demande mise à jour avec succès';
-            } else {
-                // Création
-                $requestModel = $this->requestService->createRequest($data, $user);
-                $message = 'Demande créée avec succès. Code: ' . $requestModel->code;
-            }
-
-            return response()->json([
-                'success' => true,
-                'data' => $requestModel,
-                'message' => $message
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de l\'enregistrement de la demande: ' . $e->getMessage()
-            ], 500);
-        }
-    }
+  
+  
 
     /**
-     * PUT /api/requests/{id}/status
-     * Changer le statut d'une demande
-     */
-    public function changeStatus(HttpRequest $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,accepted,rejected,cancelled'
-        ]);
-
-        try {
-            $user = auth()->user();
-            $requestModel = $this->requestService->changeStatus($id, $request->status, $user);
-
-            return response()->json([
-                'success' => true,
-                'data' => $requestModel,
-                'message' => 'Statut de la demande changé avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors du changement de statut: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * GET /api/requests
-     * Charger la liste des demandes avec filtres et pagination
+     * List Requests
+     * 
+     * Get a paginated list of requests with optional filters
+     *
+     * @queryParam status string Filter by status (pending, accepted, rejected, cancelled). Example: pending
+     * @queryParam payment_status string Filter by payment status (paid, unpaid, partial). Example: paid
+     * @queryParam date_from date Filter requests from this date. Example: 2024-01-01
+     * @queryParam date_to date Filter requests until this date. Example: 2024-12-31
+     * @queryParam center_id integer Filter by center ID. Example: 1
+     * @queryParam source string Filter by source (web, mobile, api). Example: web
+     * @queryParam last_id integer For pagination: load requests with ID less than this value. Example: 100
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "code": "REQ-2024-00001",
+     *       "status": "pending",
+     *       "payment_status": "unpaid",
+     *       "created_at": "2024-11-05T10:30:00.000000Z",
+     *       "user": {
+     *         "id": 1,
+     *         "name": "Ahmed Hassan",
+     *         "email": "ahmed@example.com"
+     *       },
+     *       "center": {
+     *         "id": 1,
+     *         "name": "Centre Maarif"
+     *       },
+     *       "deliveryType": {
+     *         "id": 1,
+     *         "name": "Express"
+     *       },
+     *       "senderCity": {
+     *         "id": 1,
+     *         "name": "Casablanca"
+     *       },
+     *       "recipientCity": {
+     *         "id": 2,
+     *         "name": "Rabat"
+     *       },
+     *       "package": {
+     *         "id": 1,
+     *         "request_id": 1,
+     *         "code": "PKG-2024-00001",
+     *         "weight": 2.5
+     *       },
+     *       "payment": {
+     *         "id": 1,
+     *         "request_id": 1,
+     *         "invoice_number": "INV-2024-00001"
+     *       }
+     *     }
+     *   ],
+     *   "moreToLoad": true,
+     *   "message": "Liste des demandes chargée avec succès"
+     * }
+     * 
+     * @response 500 scenario="Server Error" {
+     *   "success": false,
+     *   "message": "Erreur lors du chargement des demandes: Database error"
+     * }
      */
     public function loadRequestsList(HttpRequest $request)
     {
@@ -164,7 +243,6 @@ class RequestController extends Controller
                 'payment:id,request_id,invoice_number'
             ]);
 
-            // Filtres
             if ($request->has('status')) {
                 $query->where('status', $request->status);
             }
@@ -189,12 +267,6 @@ class RequestController extends Controller
                 $query->where('source', $request->source);
             }
 
-            // Si client, afficher uniquement ses demandes
-            // if (!auth()->user()->hasRole(['admin', 'manager'])) {
-            //     $query->where('user_id', auth()->id());
-            // }
-
-            // Pagination avec last_id
             if ($request->has('last_id')) {
                 $query->where('id', '<', $request->last_id);
             }
@@ -217,72 +289,78 @@ class RequestController extends Controller
         }
     }
 
+  
     /**
-     * GET /api/requests/search
-     * Rechercher des demandes
-     */
-    public function searchRequest(HttpRequest $request)
-    {
-        $request->validate([
-            'keywords' => 'required|array|min:1',
-            'keywords.*' => 'string'
-        ]);
-
-        try {
-            $query = Request::with([
-                'user:id,name,email',
-                'center:id,name',
-                'deliveryType:id,name',
-                'package:id,request_id,code'
-            ]);
-
-            // Appliquer les filtres actifs
-            if ($request->has('status')) {
-                $query->where('status', $request->status);
-            }
-
-            if ($request->has('payment_status')) {
-                $query->where('payment_status', $request->payment_status);
-            }
-
-            // Recherche par keywords
-            $query->where(function ($q) use ($request) {
-                foreach ($request->keywords as $keyword) {
-                    $q->orWhere('code', 'LIKE', "%{$keyword}%")
-                      ->orWhere('sender_full_name', 'LIKE', "%{$keyword}%")
-                      ->orWhere('recipient_full_name', 'LIKE', "%{$keyword}%")
-                      ->orWhereHas('user', function ($userQuery) use ($keyword) {
-                          $userQuery->where('name', 'LIKE', "%{$keyword}%")
-                                   ->orWhere('email', 'LIKE', "%{$keyword}%");
-                      });
-                }
-            });
-
-            // if (!auth()->user()->hasRole(['admin', 'manager'])) {
-            //     $query->where('user_id', auth()->id());
-            // }
-
-            $requests = $query->orderBy('created_at', 'desc')
-                ->limit(50)
-                ->get();
-
-            return response()->json([
-                'success' => true,
-                'data' => $requests,
-                'count' => count($requests),
-                'message' => count($requests) . ' résultat(s) trouvé(s)'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la recherche: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * GET /api/requests/{id}
-     * Voir les détails d'une demande
+     * Show Request Details
+     * 
+     * Get detailed information about a specific request
+     *
+     * @urlParam id integer required The request ID. Example: 1
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1,
+     *     "code": "REQ-2024-00001",
+     *     "user_id": 1,
+     *     "center_id": 1,
+     *     "delivery_type_id": 1,
+     *     "sender_city_id": 1,
+     *     "recipient_city_id": 2,
+     *     "sender_full_name": "Ahmed Hassan",
+     *     "sender_phone": "+212612345678",
+     *     "sender_address": "123 Rue Mohamed V",
+     *     "recipient_full_name": "Fatima Zahra",
+     *     "recipient_phone": "+212698765432",
+     *     "recipient_address": "456 Avenue Hassan II",
+     *     "weight": 2.5,
+     *     "status": "pending",
+     *     "payment_status": "unpaid",
+     *     "user": {
+     *       "id": 1,
+     *       "name": "Ahmed Hassan",
+     *       "email": "ahmed@example.com"
+     *     },
+     *     "center": {
+     *       "id": 1,
+     *       "name": "Centre Maarif",
+     *       "city": {
+     *         "id": 1,
+     *         "name": "Casablanca"
+     *       }
+     *     },
+     *     "deliveryType": {
+     *       "id": 1,
+     *       "name": "Express"
+     *     },
+     *     "senderCity": {
+     *       "id": 1,
+     *       "name": "Casablanca"
+     *     },
+     *     "recipientCity": {
+     *       "id": 2,
+     *       "name": "Rabat"
+     *     },
+     *     "package": {
+     *       "id": 1,
+     *       "code": "PKG-2024-00001"
+     *     },
+     *     "payment": {
+     *       "id": 1,
+     *       "invoice_number": "INV-2024-00001"
+     *     },
+     *     "validator": {
+     *       "id": 5,
+     *       "name": "Manager Name"
+     *     }
+     *   },
+     *   "message": "Détails de la demande chargés avec succès"
+     * }
+     * 
+     * @response 404 scenario="Not Found" {
+     *   "success": false,
+     *   "message": "Erreur lors du chargement des détails: Request not found"
+     * }
      */
     public function show($id)
     {
@@ -298,14 +376,6 @@ class RequestController extends Controller
                 'validator'
             ])->findOrFail($id);
 
-            // Vérifier les permissions
-            // if (!auth()->user()->hasRole(['admin', 'manager']) && $request->user_id !== auth()->id()){
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Vous n\'êtes pas autorisé à voir cette demande'
-            //     ], 403);
-            // }
-
             return response()->json([
                 'success' => true,
                 'data' => $request,
@@ -319,43 +389,5 @@ class RequestController extends Controller
         }
     }
 
-    /**
-     * DELETE /api/requests/{id}
-     * Supprimer une demande (soft delete)
-     */
-    public function destroy($id)
-    {
-        try {
-            $request = Request::findOrFail($id);
-
-            // Vérifier les permissions
-            // if (!auth()->user()->hasRole(['admin', 'manager'])) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Vous n\'êtes pas autorisé à supprimer cette demande'
-            //     ], 403);
-            // }
-
-            // Ne pas supprimer si déjà validée ou en cours
-            if (in_array($request->status, ['accepted']) && $request->package->status !== 'pending') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Impossible de supprimer une demande validée avec un colis en cours de traitement'
-                ], 422);
-            }
-
-            $request->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Demande supprimée avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la suppression: ' . $e->getMessage()
-            ], 500);
-        }
-    }
 
 }

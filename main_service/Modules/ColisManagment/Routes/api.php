@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\ColisManagment\Http\Controllers\RequestController;
+use Modules\ColisManagment\Http\Controllers\CrudRequestController;
 
 // Pour environnement local uniquement
 if (config('app.fake_auth_enabled')) {
@@ -13,11 +14,12 @@ if (config('app.fake_auth_enabled')) {
         Route::post('/search-address', [RequestController::class, 'searchAddress']);
         
         // CRUD des demandes
-        Route::get('/', [RequestController::class, 'loadRequestsList']);
-        Route::post('/', [RequestController::class, 'saveRequest']);
-        Route::get('/{id}', [RequestController::class, 'show']);
-        Route::put('/{id}', [RequestController::class, 'saveRequest']);
-        Route::delete('/{id}', [RequestController::class, 'destroy']);
+       // CRUD
+    Route::get('/', [RequestController::class, 'loadRequestsList']);
+    Route::post('/', [CrudRequestController::class, 'saveRequestData']);
+    Route::get('/{id}', [RequestController::class, 'show']);
+    Route::put('/{id}', [CrudRequestController::class, 'saveRequestData']);
+    Route::delete('/{id}', [CrudRequestController::class, 'destroy']);
         
         // Recherche
         Route::post('/search', [RequestController::class, 'searchRequest']);
@@ -41,13 +43,13 @@ if (config('app.fake_auth_enabled')) {
     
     // CRUD
     Route::get('/', [RequestController::class, 'loadRequestsList']);
-    Route::post('/', [RequestController::class, 'saveRequestData']);
+    Route::post('/', [CrudRequestController::class, 'saveRequestData']);
     Route::get('/{id}', [RequestController::class, 'show']);
-    Route::put('/{id}', [RequestController::class, 'saveRequestData']);
-    Route::delete('/{id}', [RequestController::class, 'destroy']);
+    Route::put('/{id}', [CrudRequestController::class, 'saveRequestData']);
+    Route::delete('/{id}', [CrudRequestController::class, 'destroy']);
     
     // Recherche
-    Route::post('/search', [RequestController::class, 'searchRequest']);
+    Route::post('/search', [CrudRequestController::class, 'searchRequest']);
     
     // Actions admin
     Route::middleware(['role:admin,manager'])->group(function () {

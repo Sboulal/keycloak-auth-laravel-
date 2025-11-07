@@ -1,6 +1,6 @@
 <?php
-// app/Http/Requests/SaveRequestRequest.php
-namespace App\Http\Requests;
+
+namespace Modules\ColisManagment\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -25,7 +25,7 @@ class SaveRequestRequest extends FormRequest
             'sender_address' => 'required|string|max:500',
             'sender_latitude' => 'nullable|numeric|between:-90,90',
             'sender_longitude' => 'nullable|numeric|between:-180,180',
-            'sender_city_id' => 'required|exists:cities,id',
+            'sender_city_id' => 'required|exists:city,id',
             
             // Destinataire
             'recipient_full_name' => 'required|string|max:255',
@@ -33,7 +33,7 @@ class SaveRequestRequest extends FormRequest
             'recipient_address' => 'required|string|max:500',
             'recipient_latitude' => 'nullable|numeric|between:-90,90',
             'recipient_longitude' => 'nullable|numeric|between:-180,180',
-            'recipient_city_id' => 'required|exists:cities,id',
+            'recipient_city_id' => 'required|exists:city,id',
             
             // Paiement
             'payment_method' => 'required|in:online,cash',

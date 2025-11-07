@@ -8,7 +8,7 @@ return new class extends Migration
 {
 public function up()
     {
-        Schema::create('region_type_pricings', function (Blueprint $table) {
+        Schema::create('region_type_pricing', function (Blueprint $table) {
             $table->id();
             $table->foreignId('city_id')->constrained('city')->cascadeOnDelete();
             $table->foreignId('delivery_type_id')->constrained('delivery_types')->cascadeOnDelete();

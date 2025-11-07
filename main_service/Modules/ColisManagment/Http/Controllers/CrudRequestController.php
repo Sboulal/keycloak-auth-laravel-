@@ -2,16 +2,11 @@
 
 namespace Modules\ColisManagment\Http\Controllers;
 
-use Modules\Core\Entities\City;
-use Modules\Core\Entities\Center;
 use Nwidart\Modules\Routing\Controller;
-use App\Http\Requests\SaveRequestRequest;
+use Modules\ColisManagment\Http\Requests\SaveRequestRequest;
 use Illuminate\Http\Request as HttpRequest;
 use Modules\ColisManagment\Entities\Request;
-use Modules\ColisManagment\Entities\DeliveryType;
 use Modules\ColisManagment\Services\RequestService;
-use Modules\ColisManagment\Entities\RegionTypePricing;
-use Modules\ColisManagment\Transformers\RequestResource;
 
 class CrudRequestController extends Controller
 {

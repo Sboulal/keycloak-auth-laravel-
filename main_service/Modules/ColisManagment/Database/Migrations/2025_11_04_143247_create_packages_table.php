@@ -11,32 +11,23 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+   public function up()
     {
-       Schema::create('packages', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('request_id')->constrained('requests')->cascadeOnDelete();
-    $table->string('code_pkg')->nullable();
-    $table->string('tracking_number')->nullable();
-    $table->float('weight')->nullable();
-    $table->float('length')->nullable();
-    $table->float('height')->nullable();
-    $table->string('content_type')->nullable();
-    $table->text('description')->nullable();
-    $table->float('declared_value')->nullable();
-    $table->string('status')->nullable();
-    $table->timestamps();
-});
+        Schema::table('packages', function (Blueprint $table) {
+            $table->float('distance')->nullable()->after('recipient_longitude');
+            $table->text('notes')->nullable()->after('distance');
+            $table->string('payment_method')->nullable()->after('notes');
+            $table->string('source')->default('online')->after('payment_method');
+        });    }
 
-    }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
-        Schema::dropIfExists('packages');
+        Schema::table('packages', function (Blueprint $table) {
+            $table->dropColumn([
+                'recipient_name', 'recipient_phone', 'recipient_address',
+                'recipient_city_id', 'recipient_latitude', 'recipient_longitude',
+                'distance', 'notes', 'payment_method', 'source'
+            ]);
+        });
     }
 };

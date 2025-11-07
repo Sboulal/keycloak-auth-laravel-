@@ -22,7 +22,7 @@ class ColisManagmentDatabaseSeeder extends Seeder
             // ColisManagementTestSeederTableSeeder::class,
             CitiesSeederTableSeeder::class,
             DeliveryTypesSeederTableSeeder::class,
-            // RegionTypePricingSeederTableSeeder::class,
+            RegionTypePricingSeederTableSeeder::class,
         ]);
     }
 }

@@ -14,12 +14,11 @@ if (config('app.fake_auth_enabled')) {
         Route::post('/search-address', [RequestController::class, 'searchAddress']);
         
         // CRUD des demandes
-       // CRUD
-    Route::get('/', [RequestController::class, 'loadRequestsList']);
-    Route::post('/', [CrudRequestController::class, 'saveRequestData']);
-    Route::get('/{id}', [RequestController::class, 'show']);
-    Route::put('/{id}', [CrudRequestController::class, 'saveRequestData']);
-    Route::delete('/{id}', [CrudRequestController::class, 'destroy']);
+        Route::get('/', [RequestController::class, 'loadRequestsList']);
+        Route::post('/', [CrudRequestController::class, 'saveRequest']);
+        Route::get('/{id}', [RequestController::class, 'show']);
+        Route::put('/{id}', [CrudRequestController::class, 'saveRequest']);
+        Route::delete('/{id}', [CrudRequestController::class, 'destroy']);
         
         // Recherche
         Route::post('/search', [RequestController::class, 'searchRequest']);
@@ -42,11 +41,11 @@ if (config('app.fake_auth_enabled')) {
     Route::post('/search-address', [RequestController::class, 'searchAddress']);
     
     // CRUD
-    Route::get('/', [RequestController::class, 'loadRequestsList']);
-    Route::post('/', [CrudRequestController::class, 'saveRequestData']);
-    Route::get('/{id}', [RequestController::class, 'show']);
-    Route::put('/{id}', [CrudRequestController::class, 'saveRequestData']);
-    Route::delete('/{id}', [CrudRequestController::class, 'destroy']);
+     Route::get('/', [RequestController::class, 'loadRequestsList']);
+        Route::post('/', [RequestController::class, 'saveRequest']);
+        Route::get('/{id}', [RequestController::class, 'show']);
+        Route::put('/{id}', [RequestController::class, 'saveRequest']);
+        Route::delete('/{id}', [RequestController::class, 'destroy']);
     
     // Recherche
     Route::post('/search', [CrudRequestController::class, 'searchRequest']);

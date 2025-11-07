@@ -9,6 +9,15 @@ class Request extends Model
 {
     use HasFactory;
 
+    // Constantes pour les statuts
+    const STATUS_PENDING = 0;
+    const STATUS_VALIDATED = 1;
+    const STATUS_CANCELLED = 2;
+    
+    const PAYMENT_UNPAID = 0;
+    const PAYMENT_PAID = 1;
+    const PAYMENT_REFUNDED = 2;
+
     protected $fillable = [
         'code',
         'user_id',
@@ -23,8 +32,8 @@ class Request extends Model
         'longitude',
         'poids',
         'amount',
-        'status',          // 0 pending | 1 validée | 2 annulée
-        'payment_status',  // 0 impayée | 1 payée | 2 remboursée
+        'status',
+        'payment_status',
     ];
 
     protected $casts = [
@@ -36,43 +45,56 @@ class Request extends Model
         'payment_status' => 'integer',
     ];
 
+    // Accesseurs pour avoir des labels lisibles
+    public function getStatusLabelAttribute()
+    {
+        return [
+            self::STATUS_PENDING => 'En attente',
+            self::STATUS_VALIDATED => 'Validée',
+            self::STATUS_CANCELLED => 'Annulée',
+        ][$this->status] ?? 'Inconnu';
+    }
+
+    public function getPaymentStatusLabelAttribute()
+    {
+        return [
+            self::PAYMENT_UNPAID => 'Impayée',
+            self::PAYMENT_PAID => 'Payée',
+            self::PAYMENT_REFUNDED => 'Remboursée',
+        ][$this->payment_status] ?? 'Inconnu';
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Relations
     |--------------------------------------------------------------------------
     */
 
-    // demande appartient à un utilisateur
     public function user()
     {
         return $this->belongsTo(\Modules\UserManagment\Entities\User::class);
     }
 
-    // centre
     public function center()
     {
         return $this->belongsTo(\Modules\Core\Entities\Center::class);
     }
 
-    // ville
     public function city()
     {
         return $this->belongsTo(\Modules\Core\Entities\City::class);
     }
 
-    // type livraison
     public function deliveryType()
     {
         return $this->belongsTo(\Modules\Core\Entities\DeliveryType::class);
     }
 
-    // le colis attaché à la demande
     public function package()
     {
         return $this->hasOne(\Modules\ColisManagment\Entities\Package::class);
     }
 
-    // paiement lié à la demande
     public function payment()
     {
         return $this->hasOne(\Modules\Payment\Entities\Payment::class);

@@ -42,19 +42,19 @@ if (config('app.fake_auth_enabled')) {
     
     // CRUD
      Route::get('/', [RequestController::class, 'loadRequestsList']);
-        Route::post('/', [RequestController::class, 'saveRequest']);
-        Route::get('/{id}', [RequestController::class, 'show']);
-        Route::put('/{id}', [RequestController::class, 'saveRequest']);
-        Route::delete('/{id}', [RequestController::class, 'destroy']);
+     Route::post('/', [RequestController::class, 'saveRequest']);
+     Route::get('/{id}', [RequestController::class, 'show']);
+     Route::put('/{id}', [RequestController::class, 'saveRequest']);
+     Route::delete('/{id}', [RequestController::class, 'destroy']);
     
     // Recherche
     Route::post('/search', [CrudRequestController::class, 'searchRequest']);
     
     // Actions admin
     Route::middleware(['role:admin,manager'])->group(function () {
-        Route::put('/{id}/status', [RequestController::class, 'changeRequestStatus']);
-        Route::post('/{id}/payment', [RequestController::class, 'applyPayment']);
-        Route::put('/{id}/payment-status', [RequestController::class, 'changePaymentStatus']);
+    Route::put('/{id}/status', [RequestController::class, 'changeRequestStatus']);
+    Route::post('/{id}/payment', [RequestController::class, 'applyPayment']);
+    Route::put('/{id}/payment-status', [RequestController::class, 'changePaymentStatus']);
     });
 });
 }

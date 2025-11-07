@@ -18,7 +18,6 @@ return new class extends Migration
     $table->string('code_driver')->nullable();
     $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
     $table->foreignId('center_id')->nullable()->constrained('centers')->nullOnDelete();
-    $table->string('vehicle_type')->nullable();
     $table->string('vehicle_number')->nullable();
     $table->boolean('is_active')->default(true);
     $table->float('rating')->nullable();

@@ -1,8 +1,9 @@
 <?php
-// Modules/ColisManagment/Services/RequestService.php
+// Modules/Core/Services/GeocodingService.php
 namespace Modules\Core\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Modules\ColisManagment\Entities\Package;
@@ -11,45 +12,49 @@ use Modules\ColisManagment\Entities\RegionTypePricing;
 
 class GeocodingService
 {
-    protected $googleApiKey;
     protected $orsApiKey;
+    protected $nominatimUrl = 'https://nominatim.openstreetmap.org';
 
     public function __construct()
     {
-        $this->googleApiKey = config('services.google_maps.api_key');
         $this->orsApiKey = config('services.openrouteservice.api_key');
     }
 
     /**
-     * Rechercher une adresse avec Google Maps Geocoding API
+     * Rechercher une adresse avec Nominatim (OpenStreetMap) - GRATUIT
      */
     public function searchAddress($query)
     {
-        // Cache pour 1 heure
         $cacheKey = 'geocode_' . md5($query);
         
         return Cache::remember($cacheKey, 3600, function () use ($query) {
             try {
-                $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
-                    'address' => $query,
-                    'key' => $this->googleApiKey,
-                    'language' => 'fr',
-                    'region' => 'ma'
+                // Nominatim nécessite un User-Agent
+                $response = Http::withHeaders([
+                    'User-Agent' => config('app.name', 'Laravel') . ' Geocoding'
+                ])->get($this->nominatimUrl . '/search', [
+                    'q' => $query,
+                    'format' => 'json',
+                    'addressdetails' => 1,
+                    'limit' => 1,
+                    'countrycodes' => 'ma', // Limité au Maroc
+                    'accept-language' => 'fr'
                 ]);
 
                 $data = $response->json();
 
-                if ($data['status'] === 'OK' && !empty($data['results'])) {
-                    $result = $data['results'][0];
+                if (!empty($data)) {
+                    $result = $data[0];
                     
                     return [
                         'success' => true,
-                        'address' => $result['formatted_address'],
-                        'latitude' => $result['geometry']['location']['lat'],
-                        'longitude' => $result['geometry']['location']['lng'],
+                        'address' => $result['display_name'],
+                        'latitude' => (float) $result['lat'],
+                        'longitude' => (float) $result['lon'],
                         'place_id' => $result['place_id'],
-                        'types' => $result['types'],
-                        'components' => $result['address_components'] ?? []
+                        'type' => $result['type'] ?? null,
+                        'importance' => $result['importance'] ?? null,
+                        'components' => $result['address'] ?? []
                     ];
                 }
 
@@ -59,6 +64,7 @@ class GeocodingService
                 ];
 
             } catch (\Exception $e) {
+                Log::error('Geocoding error: ' . $e->getMessage());
                 return [
                     'success' => false,
                     'message' => 'Erreur: ' . $e->getMessage()
@@ -68,7 +74,7 @@ class GeocodingService
     }
 
     /**
-     * Obtenir l'adresse à partir des coordonnées (reverse geocoding)
+     * Obtenir l'adresse à partir des coordonnées (reverse geocoding) - GRATUIT
      */
     public function reverseGeocode($latitude, $longitude)
     {
@@ -76,18 +82,23 @@ class GeocodingService
         
         return Cache::remember($cacheKey, 3600, function () use ($latitude, $longitude) {
             try {
-                $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
-                    'latlng' => "{$latitude},{$longitude}",
-                    'key' => $this->googleApiKey,
-                    'language' => 'fr'
+                $response = Http::withHeaders([
+                    'User-Agent' => config('app.name', 'Laravel') . ' Geocoding'
+                ])->get($this->nominatimUrl . '/reverse', [
+                    'lat' => $latitude,
+                    'lon' => $longitude,
+                    'format' => 'json',
+                    'addressdetails' => 1,
+                    'accept-language' => 'fr'
                 ]);
 
                 $data = $response->json();
 
-                if ($data['status'] === 'OK' && !empty($data['results'])) {
+                if (!empty($data) && isset($data['display_name'])) {
                     return [
                         'success' => true,
-                        'address' => $data['results'][0]['formatted_address']
+                        'address' => $data['display_name'],
+                        'components' => $data['address'] ?? []
                     ];
                 }
 
@@ -97,6 +108,7 @@ class GeocodingService
                 ];
 
             } catch (\Exception $e) {
+                Log::error('Reverse geocoding error: ' . $e->getMessage());
                 return [
                     'success' => false,
                     'message' => 'Erreur: ' . $e->getMessage()
@@ -106,7 +118,7 @@ class GeocodingService
     }
 
     /**
-     * Calculer un itinéraire avec OpenRouteService
+     * Calculer un itinéraire avec OpenRouteService - GRATUIT (avec limite)
      */
     public function getRoute($startLat, $startLng, $endLat, $endLng)
     {
@@ -135,6 +147,8 @@ class GeocodingService
                     'route' => $coordinates->toArray(),
                     'distance' => $properties['distance'] ?? null, // mètres
                     'duration' => $properties['duration'] ?? null, // secondes
+                    'distance_km' => isset($properties['distance']) ? round($properties['distance'] / 1000, 2) : null,
+                    'duration_minutes' => isset($properties['duration']) ? round($properties['duration'] / 60, 2) : null,
                 ];
             }
 
@@ -144,6 +158,7 @@ class GeocodingService
             ];
 
         } catch (\Exception $e) {
+            Log::error('Route calculation error: ' . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Erreur: ' . $e->getMessage()
@@ -152,7 +167,7 @@ class GeocodingService
     }
 
     /**
-     * Calculer la distance entre deux points (méthode Haversine)
+     * Calculer la distance entre deux points (méthode Haversine) - 100% GRATUIT
      */
     public function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
@@ -170,5 +185,68 @@ class GeocodingService
             cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
 
         return round($angle * $earthRadius, 2); // km
+    }
+
+    /**
+     * Autocomplete d'adresse avec Nominatim - GRATUIT
+     */
+    public function autocomplete($query, $limit = 5)
+    {
+        $cacheKey = 'autocomplete_' . md5($query . $limit);
+        
+        return Cache::remember($cacheKey, 1800, function () use ($query, $limit) {
+            try {
+                $response = Http::withHeaders([
+                    'User-Agent' => config('app.name', 'Laravel') . ' Geocoding'
+                ])->get($this->nominatimUrl . '/search', [
+                    'q' => $query,
+                    'format' => 'json',
+                    'addressdetails' => 1,
+                    'limit' => $limit,
+                    'countrycodes' => 'ma',
+                    'accept-language' => 'fr'
+                ]);
+
+                $data = $response->json();
+
+                if (!empty($data)) {
+                    return [
+                        'success' => true,
+                        'suggestions' => collect($data)->map(function ($item) {
+                            return [
+                                'address' => $item['display_name'],
+                                'latitude' => (float) $item['lat'],
+                                'longitude' => (float) $item['lon'],
+                                'type' => $item['type'] ?? null,
+                                'city' => $item['address']['city'] ?? $item['address']['town'] ?? null,
+                                'region' => $item['address']['state'] ?? null,
+                            ];
+                        })->toArray()
+                    ];
+                }
+
+                return [
+                    'success' => false,
+                    'suggestions' => []
+                ];
+
+            } catch (\Exception $e) {
+                Log::error('Autocomplete error: ' . $e->getMessage());
+                return [
+                    'success' => false,
+                    'suggestions' => []
+                ];
+            }
+        });
+    }
+
+    /**
+     * Respecter les limites d'utilisation de Nominatim
+     * (1 requête par seconde maximum)
+     */
+    private function respectRateLimit()
+    {
+        // Ajouter un délai si nécessaire
+        usleep(1000000); // 1 seconde
     }
 }

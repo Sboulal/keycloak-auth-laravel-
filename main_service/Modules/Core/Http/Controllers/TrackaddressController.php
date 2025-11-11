@@ -12,6 +12,7 @@ use Modules\Core\Services\GeocodingService;
 use Illuminate\Contracts\Support\Renderable;
 use Modules\ColisManagment\Entities\Delivery;
 
+
 class TrackaddressController extends Controller
 {
     protected $geocodingService;
@@ -39,7 +40,8 @@ class TrackaddressController extends Controller
             ], 422);
         }
 
-        $result = $this->geocodingService->searchAddress($request->query);
+        $validated = $request->validate(['query' => 'required|string']);
+        $result = $this->geocodingService->searchAddress($validated['query']);
 
         return response()->json($result, $result['success'] ? 200 : 404);
     }
@@ -423,5 +425,43 @@ class TrackaddressController extends Controller
             ], 500);
         }
     }
-}
 
+        public function storeDriver(Request $request)
+     {
+         $validator = Validator::make($request->all(), [
+             'user_id' => 'required|exists:users,id',
+             'vehicle_type' => 'required|string|max:100',
+             'license_number' => 'nullable|string|max:100',
+             'is_active' => 'nullable|boolean',
+         ]);
+     
+         if ($validator->fails()) {
+             return response()->json([
+                 'success' => false,
+                 'errors' => $validator->errors()
+             ], 422);
+         }
+     
+         try {
+             $driver = Driver::create([
+                 'user_id' => $request->user_id,
+                 'vehicle_type' => $request->vehicle_type,
+                 'license_number' => $request->license_number,
+                 'is_active' => $request->is_active ?? true,
+                 'is_online' => false,
+             ]);
+     
+             return response()->json([
+                 'success' => true,
+                 'message' => 'Livreur créé avec succès',
+                 'driver' => $driver
+             ], 201);
+     
+         } catch (\Exception $e) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Erreur: '.$e->getMessage()
+             ], 500);
+         }
+     }
+}

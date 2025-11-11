@@ -35,7 +35,10 @@ services:
       - ./auth_service/.env
     environment:
       - DB_HOST=auth_postgres
-      - DB_DATABASE=packages-management
+      - DB_DATABASE=auth_db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
     networks:
       - laravel_net
 
@@ -48,19 +51,24 @@ services:
       - "6500:6500"
     volumes:
       - ./main_service:/var/www
+    depends_on:
+      - main_postgres
     environment:
-      - DB_HOST=auth_postgres
-      - DB_DATABASE=packages-management
+      - DB_HOST=main_postgres
+      - DB_DATABASE=main_db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
       - FAKE_AUTH_ENABLED=true
     networks:
       - laravel_net
 
-
+  # Auth Service Database
   auth_postgres:
     image: postgres:15
     container_name: pkg-manage-auth-db
     environment:
-      POSTGRES_DB: packages-management
+      POSTGRES_DB: auth_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
@@ -70,8 +78,24 @@ services:
     networks:
       - laravel_net
 
+  # Main Service Database (NEW)
+  main_postgres:
+    image: postgres:15
+    container_name: pkg-manage-main-db
+    environment:
+      POSTGRES_DB: main_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - main_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - laravel_net
+
 volumes:
   auth_pgdata:
+  main_pgdata:  # New volume for main service
 
 networks:
   laravel_net:

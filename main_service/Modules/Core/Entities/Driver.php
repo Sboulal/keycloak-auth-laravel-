@@ -14,6 +14,8 @@ class Driver extends Model
     protected $fillable = [
         'code_driver',
         'user_id',
+         'center_id',
+        'vehicle_type',
         'last_latitude',
         'last_longitude',
         'last_position_update',

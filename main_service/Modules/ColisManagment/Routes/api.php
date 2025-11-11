@@ -11,7 +11,7 @@ if (config('app.fake_auth_enabled')) {
         Route::get('/prepare-data', [RequestController::class, 'prepareRequestData']);
         
         // Rechercher une adresse
-        Route::post('/search-address', [RequestController::class, 'searchAddress']);
+        // Route::post('/search-address', [RequestController::class, 'searchAddress']);
         
         // CRUD des demandes
         Route::get('/', [RequestController::class, 'loadRequestsList']);

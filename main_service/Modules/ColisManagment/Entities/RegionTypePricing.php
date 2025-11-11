@@ -32,6 +32,6 @@ class RegionTypePricing extends Model
 
     public function deliveryType()
     {
-        return $this->belongsTo(\Modules\Core\Entities\DeliveryType::class);
+        return $this->belongsTo(\Modules\ColisManagment\Entities\DeliveryType::class);
     }
 }

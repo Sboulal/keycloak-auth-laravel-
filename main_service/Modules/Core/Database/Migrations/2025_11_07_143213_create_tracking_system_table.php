@@ -13,7 +13,7 @@ return new class extends Migration
             $table->decimal('last_latitude', 10, 7)->nullable()->after('id');
             $table->decimal('last_longitude', 10, 7)->nullable()->after('last_latitude');
             $table->timestamp('last_position_update')->nullable()->after('last_longitude');
-            // $table->string('vehicle_type')->default('car')->after('last_position_update'); // car, bike, truck
+            $table->string('vehicle_type')->default('car')->after('last_position_update'); // car, bike, truck
             $table->boolean('is_online')->default(false)->after('vehicle_type');
         });
 

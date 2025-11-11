@@ -1,42 +1,39 @@
-# 1. Image de base PHP avec FPM
 FROM php:8.2-fpm-alpine
 
-# 2. Installer les dépendances système
+# Install system dependencies
 RUN apk add --no-cache \
-    bash \
     git \
-    unzip \
-    libzip-dev \
-    oniguruma-dev \
     curl \
-    mysql-client \
-    postgresql-dev \
-    icu-dev \
-    nodejs \
-    npm \
-    freetype-dev \
-    libjpeg-turbo-dev \
     libpng-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql mbstring zip intl bcmath opcache
+    oniguruma-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    postgresql-dev
 
-# 3. Installer Composer (copié depuis l'image officielle)
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
+
+# Get Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 4. Définir le répertoire de travail
+# Set working directory
 WORKDIR /var/www
 
-# 5. Copier le code du projet Laravel
+# Copy application files
 COPY . .
 
-# 6. Installer les dépendances PHP
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+# Remove existing public/storage symlink if it exists
+RUN rm -rf public/storage
 
-# 7. Donner les permissions nécessaires à Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Install dependencies
+# RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# 8. Exposer le port utilisé par php artisan serve
+# Create storage link and set permissions
+RUN php artisan storage:link || true && \
+    chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
+    chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
 EXPOSE 6500
 
-# 9. Lancer le serveur Laravel
 CMD php artisan serve --host=0.0.0.0 --port=6500

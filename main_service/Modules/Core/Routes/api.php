@@ -25,7 +25,7 @@ Route::prefix('tracking')->group(function () {
     // Gestion des livreurs
     Route::get('/active-drivers', [TrackaddressController::class, 'getActiveDrivers']);
     Route::post('/driver/{driverId}/toggle-online', [TrackaddressController::class, 'toggleDriverOnline']);
-    
+    Route::post('/drivers', [TrackaddressController::class, 'storeDriver']);
     // Tracking en temps réel
     Route::post('/record-point', [TrackaddressController::class, 'recordTrackingPoint']);
     
